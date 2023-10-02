@@ -6,12 +6,6 @@
     "routes":[{
         "src": "/(.*)",
         "dest": "/" 
-    }],
-    
-        "functions":[ {
-          "miFuncion": {
-            "timeout": 10 
-          }
-        }]
+    }]
       
     }
