@@ -98,9 +98,9 @@ app.post('/logout', (req,res) => {
 app.post('/post', uploadMiddleware.single('file'), async (req,res) => {
     const {originalname,path} = req.file;
     const parts = originalname.split('.');
-    const newPath = `/tmp/${originalname}`;
+    const ext = parts[parts.length - 1];
+    const newPath = path+'.'+ext;
     fs.renameSync(path, newPath);
-    
     
     const {title, summary, content,author,category} = req.body;
     const postDoc = await Post.create({
