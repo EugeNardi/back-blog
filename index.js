@@ -8,7 +8,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 const multer = require('multer');
-const uploadMiddleware = multer({ dest: '/tmp/' });
+const uploadMiddleware = multer({ dest: 'uploads/' });
 const fs = require('fs');
 const salt = bcrypt.genSaltSync(10);
 const secret = 'asdfe45we45w345wegw345werjktjwertkjasbfoafnqwojfbqwijfm13rboj12ren1oinoqwndipw';
@@ -80,7 +80,7 @@ app.get('/profile', (req,res) => {
   jwt.verify(token, secret, (err, info) => {
     if (err) {
       return res.status(401).json({ error: 'Token inválido o expirado' });
-    }
+    } 
     res.json(info);
   });
 });
