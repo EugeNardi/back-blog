@@ -6,5 +6,12 @@
     "routes":[{
         "src": "/(.*)",
         "dest": "/"
+      
+    }],
+    "routes":[{
+    "src": "/post",
+    "methods": ["GET", "POST"],
+    "headers": ["Origin", "X-Requested-With", "Content-Type", "Accept"],
+    "allow": ["http://localhost:5173"]
     }]
-}
+    }
