@@ -5,13 +5,10 @@
     }],
     "routes":[{
         "src": "/(.*)",
-        "dest": "/"
+        "dest": "/" ,
+        "methods": ["GET", "POST"],
+        "headers": ["Origin", "X-Requested-With", "Content-Type", "Accept"],
+        "allow": ["http://localhost:5173"]
       
-    }],
-    "routes":[{
-    "src": "/post",
-    "methods": ["GET", "POST"],
-    "headers": ["Origin", "X-Requested-With", "Content-Type", "Accept"],
-    "allow": ["http://localhost:5173"]
     }]
     }
