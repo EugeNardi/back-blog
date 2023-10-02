@@ -5,6 +5,6 @@
       { "handle": "filesystem" },
       { "src": "/uploads/(.*)", "dest": "/uploads/$1" },
       { "src": "/(.*)", "dest": "/index.js" }
-    ],
-    "public": { "ignore": ["**/*.js"] }
+    ]
+  
   }
