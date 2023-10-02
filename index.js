@@ -1,5 +1,6 @@
 const express = require("express");
 const app = express()
+const path = require("path");
 const cors = require('cors');
 const mongoose = require("mongoose");
 const User = require('./models/User');
@@ -8,7 +9,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 const multer = require('multer');
-const uploadMiddleware = multer({ dest: 'uploads/' });
+const uploadMiddleware = multer({ dest: path.join(__dirname, 'uploads/') });
 const fs = require('fs');
 const salt = bcrypt.genSaltSync(10);
 const secret = 'asdfe45we45w345wegw345werjktjwertkjasbfoafnqwojfbqwijfm13rboj12ren1oinoqwndipw';
