@@ -15,7 +15,9 @@ const secret = 'asdfe45we45w345wegw345werjktjwertkjasbfoafnqwojfbqwijfm13rboj12r
 
 
 app.listen(4000)
-app.use(cors({credentials:true,origin:'http://localhost:5173'}));
+
+
+app.use(cors({ origin: 'http://localhost:5173' }));
 app.use(express.json());
 app.use(cookieParser());
 app.use('/uploads', express.static(__dirname + '/uploads'));
