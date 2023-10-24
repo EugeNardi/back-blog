@@ -67,8 +67,8 @@ app.post('/login', async (req,res) => {
     // logged in
     jwt.sign({username,id:userDoc._id}, secret, {}, (err,token) => {
       if (err) throw err;
-      res.cookie('token', token).json({
-        id:userDoc._id,
+      res.cookie('token', token, { secure: true, httpOnly: true }).json({
+        id: userDoc._id,
         username,
       });
     });
@@ -139,3 +139,9 @@ app.get('/post/:id', async (req, res) => {
 })
 
 console.log("Server running on port 4000");
+
+
+
+/*      res.cookie('token', token).json({
+  id:userDoc._id,
+  username,*/
