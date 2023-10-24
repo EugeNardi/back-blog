@@ -17,6 +17,11 @@ const secret = 'asdfe45we45w345wegw345werjktjwertkjasbfoafnqwojfbqwijfm13rboj12r
 
 app.listen(4000)
 
+const corsOptions = {
+  origin: 'http://localhost:5173',
+  credentials: true,
+};
+app.use(cors(corsOptions));
 
 app.use(cors({ origin: 'http://localhost:5173' }));
 app.use((req, res, next) => {
