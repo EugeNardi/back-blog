@@ -1,4 +1,181 @@
 const express = require("express");
+const app = express();
+const cors = require("cors");
+const mongoose = require("mongoose");
+const User = require("./models/User");
+const Post = require("./models/Post");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const cookieParser = require("cookie-parser");
+const multer = require("multer");
+const fs = require("fs");
+
+const uploadMiddleware = multer({ dest: "uploads/" });
+const salt = bcrypt.genSaltSync(10);
+const secret =
+  "asdfe45we45w345wegw345werjktjwertkjasbfoafnqwojfbqwijfm13rboj12ren1oinoqwndipw";
+
+// =========================
+// 🔗 Conexión a MongoDB
+// =========================
+mongoose
+  .connect(
+    "mongodb+srv://euge060406:ElonMusk0604@cluster0.srv4o5i.mongodb.net/?retryWrites=true&w=majority"
+  )
+  .then(() => console.log("✅ MongoDB conectado"))
+  .catch((err) => console.error("❌ Error MongoDB:", err));
+
+// =========================
+// ⚙️ Middlewares
+// =========================
+const corsOptions = {
+  origin: "https://noticias-x.netlify.app", // tu frontend
+  credentials: true,
+};
+app.use(cors(corsOptions));
+app.use(express.json());
+app.use(cookieParser());
+app.use("/uploads", express.static(__dirname + "/uploads"));
+
+// =========================
+// 🟢 Rutas
+// =========================
+
+// Comprobar servidor
+app.get("/", (req, res) => {
+  res.json("✅ El servidor funciona");
+});
+
+// Registro de usuario
+app.post("/register", async (req, res) => {
+  const { username, password } = req.body;
+  try {
+    const userDoc = await User.create({
+      username,
+      password: bcrypt.hashSync(password, salt),
+    });
+    res.json(userDoc);
+  } catch (e) {
+    console.error("Error registro:", e);
+    res.status(400).json(e);
+  }
+});
+
+// Login de usuario
+app.post("/login", async (req, res) => {
+  const { username, password } = req.body;
+  const userDoc = await User.findOne({ username });
+
+  if (!userDoc) {
+    return res.status(400).json("Usuario no encontrado");
+  }
+
+  const passOk = bcrypt.compareSync(password, userDoc.password);
+  if (passOk) {
+    jwt.sign({ username, id: userDoc._id }, secret, {}, (err, token) => {
+      if (err) throw err;
+      res
+        .cookie("token", token, {
+          secure: true,
+          httpOnly: true,
+          sameSite: "none",
+        })
+        .json({
+          id: userDoc._id,
+          username,
+        });
+    });
+  } else {
+    res.status(400).json("Usuario o contraseña incorrecta");
+  }
+});
+
+// Perfil
+app.get("/profile", (req, res) => {
+  const { token } = req.cookies;
+  if (!token) {
+    return res.status(401).json({ error: "Token no proporcionado" });
+  }
+
+  jwt.verify(token, secret, (err, info) => {
+    if (err) {
+      return res.status(401).json({ error: "Token inválido o expirado" });
+    }
+    res.json(info);
+  });
+});
+
+// Logout
+app.post("/logout", (req, res) => {
+  res.cookie("token", "", { sameSite: "none", secure: true }).json("ok");
+});
+
+// Crear Post
+app.post("/post", uploadMiddleware.single("file"), async (req, res) => {
+  try {
+    let newPath = null;
+
+    if (req.file) {
+      const { originalname, path } = req.file;
+      const parts = originalname.split(".");
+      const ext = parts[parts.length - 1];
+      newPath = path + "." + ext;
+      fs.renameSync(path, newPath);
+    }
+
+    const { title, summary, content, author, category } = req.body;
+
+    const postDoc = await Post.create({
+      title,
+      summary,
+      content,
+      cover: newPath, // puede ser null si no hay imagen
+      author,
+      category,
+    });
+
+    res.json(postDoc);
+  } catch (err) {
+    console.error("❌ Error al crear el post:", err);
+    res.status(500).json({ error: "Error al crear la noticia" });
+  }
+});
+
+// Listar posts
+app.get("/post", async (req, res) => {
+  try {
+    const posts = await Post.find().sort({ createdAt: -1 }).limit(50);
+    res.json(posts);
+  } catch (err) {
+    console.error("❌ Error al obtener posts:", err);
+    res.status(500).json({ error: "Error al obtener posts" });
+  }
+});
+
+// Obtener post por ID
+app.get("/post/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const postDoc = await Post.findById(id);
+    res.json(postDoc);
+  } catch (err) {
+    console.error("❌ Error al obtener post:", err);
+    res.status(500).json({ error: "Error al obtener post" });
+  }
+});
+
+// =========================
+// 🚀 Export para Vercel
+// =========================
+module.exports = app;
+
+// Solo en local: puerto 4000
+if (require.main === module) {
+  app.listen(4000, () => console.log("✅ Server en puerto 4000"));
+}
+
+/*
+const express = require("express");
 const app = express()
 const path = require("path");
 const cors = require('cors');
