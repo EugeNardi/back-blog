@@ -1,8 +1,3 @@
-
-
-
-
-
 const express = require("express");
 const app = express();
 const path = require("path");
@@ -107,47 +102,39 @@ app.post('/logout', (req,res) => {
   res.cookie('token', '').json('ok');
 });
 
-// 🔹 Ruta POST /post protegida con try/catch
+// 🔹 Ruta POST /post compatible con frontend actual
 app.post('/post', uploadMiddleware.single('file'), async (req,res) => {
   try {
     let newPath = null;
 
-    if (req.file && req.file.originalname && req.file.path) {
+    // Solo renombrar si hay archivo
+    if (req.file) {
       const { originalname, path: filepath } = req.file;
-      const parts = originalname.split('.');
-      const ext = parts[parts.length - 1];
+      const ext = originalname.split('.').pop();
       newPath = filepath + '.' + ext;
 
       try {
         fs.renameSync(filepath, newPath);
-      } catch (renameErr) {
-        console.error('renameSync falló, intentando fallback copy:', renameErr);
-        try {
-          fs.copyFileSync(filepath, newPath);
-          fs.unlinkSync(filepath);
-        } catch (copyErr) {
-          console.error('fallback copy también falló:', copyErr);
-          newPath = null;
-        }
+      } catch (err) {
+        console.error('No se pudo renombrar archivo:', err);
+        newPath = null; // Dejar como null para que post se cree sin cover
       }
-    } else {
-      console.log('No file uploaded for this post (req.file undefined). Continuing without cover.');
     }
 
-    const {title, summary, content,author,category} = req.body;
+    const { title, summary, content, author, category } = req.body;
 
     const postDoc = await Post.create({
       title,
       summary,
       content,
-      cover: newPath,
+      cover: newPath, // null si no hay imagen
       author,
       category,
     });
 
     res.json(postDoc);
   } catch (err) {
-    console.error('Error en POST /post:', err && (err.stack || err.message) ? (err.stack || err.message) : err);
+    console.error('Error en POST /post:', err);
     res.status(500).json({ error: 'Error al crear la noticia' });
   }
 });
@@ -166,8 +153,6 @@ app.get('/post/:id', async (req, res) => {
 });
 
 console.log("Server running on port 4000");
-
-
 
 
 /*
