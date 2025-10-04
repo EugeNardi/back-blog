@@ -29,14 +29,14 @@ try {
 app.listen(4000);
 
 const corsOptions = {
-  origin: 'https://noticias-x.netlify.app',
+  origin: 'http://noticias-x.com',
   credentials: true,
 };
 app.use(cors(corsOptions));
 
-app.use(cors({ origin: 'https://noticias-x.netlify.app', credentials:true }));
+app.use(cors({ origin: 'http://noticias-x.com', credentials:true }));
 app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', 'https://noticias-x.netlify.app');
+  res.setHeader('Access-Control-Allow-Origin', 'http://noticias-x.com');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
   res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
   res.setHeader('Access-Control-Allow-Credentials', true);
