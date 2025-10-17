@@ -28,20 +28,33 @@ try {
 
 app.listen(4000);
 
-const corsOptions = {
-  origin: 'http://noticias-x.com/',
-  credentials: true,
-};
-app.use(cors(corsOptions));
+// Lista de orígenes permitidos
+const allowedOrigins = [
+  'https://noticias-x.com',
+  'https://www.noticias-x.com',
+  'http://noticias-x.com',
+  'http://www.noticias-x.com',
+  'https://noticias-x.netlify.app'
+];
 
-app.use(cors({ origin: 'http://noticias-x.com/', credentials:true }));
-app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', 'http://noticias-x.com/');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
-  res.setHeader('Access-Control-Allow-Credentials', true);
-  next();
-});
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Permitir requests sin origin (como mobile apps o curl)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'OPTIONS', 'PUT', 'PATCH', 'DELETE'],
+  allowedHeaders: ['X-Requested-With', 'Content-Type', 'Authorization'],
+  exposedHeaders: ['Set-Cookie']
+};
+
+app.use(cors(corsOptions));
 
 app.use(express.json());
 app.use(cookieParser());
@@ -74,7 +87,12 @@ app.post('/login', async (req,res) => {
   if (passOk) {
     jwt.sign({username,id:userDoc._id}, secret, {}, (err,token) => {
       if (err) throw err;
-      res.cookie('token', token, { secure: true, httpOnly: true }).json({
+      res.cookie('token', token, { 
+        secure: true, 
+        httpOnly: true,
+        sameSite: 'none',
+        maxAge: 24 * 60 * 60 * 1000 // 24 horas
+      }).json({
         id: userDoc._id,
         username,
       });
@@ -99,7 +117,12 @@ app.get('/profile', (req,res) => {
 });
 
 app.post('/logout', (req,res) => { 
-  res.cookie('token', '').json('ok');
+  res.cookie('token', '', {
+    secure: true,
+    httpOnly: true,
+    sameSite: 'none',
+    maxAge: 0
+  }).json('ok');
 });
 
 // 🔹 Ruta POST /post compatible con frontend actual
