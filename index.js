@@ -34,7 +34,9 @@ const allowedOrigins = [
   'https://www.noticias-x.com',
   'http://noticias-x.com',
   'http://www.noticias-x.com',
-  'https://noticias-x.netlify.app'
+  'https://noticias-x.netlify.app',
+  'http://localhost:5173', // Para desarrollo local
+  'http://localhost:3000'
 ];
 
 const corsOptions = {
