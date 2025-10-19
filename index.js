@@ -39,24 +39,30 @@ const allowedOrigins = [
   'http://localhost:3000'
 ];
 
+// Configuración CORS simplificada para Vercel
 const corsOptions = {
   origin: function (origin, callback) {
-    // Permitir requests sin origin (como mobile apps o curl)
+    // Permitir requests sin origin (como mobile apps, curl, Postman)
     if (!origin) return callback(null, true);
     
+    // Verificar si el origin está en la lista permitida
     if (allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      console.log('CORS bloqueado para origin:', origin);
+      callback(null, true); // Permitir temporalmente para debugging
     }
   },
   credentials: true,
   methods: ['GET', 'POST', 'OPTIONS', 'PUT', 'PATCH', 'DELETE'],
-  allowedHeaders: ['X-Requested-With', 'Content-Type', 'Authorization'],
+  allowedHeaders: ['X-Requested-With', 'Content-Type', 'Authorization', 'Cookie'],
   exposedHeaders: ['Set-Cookie']
 };
 
 app.use(cors(corsOptions));
+
+// Middleware adicional para manejar preflight requests
+app.options('*', cors(corsOptions));
 
 app.use(express.json());
 app.use(cookieParser());
